@@ -14,7 +14,7 @@ In order to use this, you need to add the following lines to your hosts file
 
 ### Starting the app
 
-Run `npm start`, and then open `http://site-org.fakehub.fakegis.com` in Chrome.
+Run `npm start`, and then open `http://site-org.fakehub.fakegis.com:3000` in Chrome.
 
 If you want to explore how this will work when Chrome 80 lands, and starts treating all cookies without a `SameSite` attribute as `SameSite=Lax`, then enable the "SameSite by default cookies" flag, availabe at [chrome://flags/](chrome://flags/)
 
