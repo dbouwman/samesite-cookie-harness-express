@@ -1,0 +1,49 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-8">
+      <h3>IFramed App</h3>
+      <h4>Url: {{url}}</h4>
+    </div>
+    <div class="col-sm-4">
+      <button class="btn btn-default btn-xs"  onClick="reload();">Reload from server</button>
+    </div>
+  </div>
+    
+  <div class="row">
+    <div class="col-sm-6">
+      <h4>Cookies availabe @ Server</h4>
+      <p>This is what the "bridge" would see</p>
+      <ul>
+        <li>Platform Cookie: {{cookies.platformCookie}}</li>
+        <li>Org Cookie: {{cookies.orgCookie}}</li>
+      </ul>
+    </div>
+    <div class="col-sm-6">
+      <h4>Cookies availabe @ Client</h4>
+      <p>This is what a javascript application would see</p>
+      <ul id="clientCookies"></ul>
+      <button class="btn btn-default btn-xs"  onClick="updateClient();">Refresh</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+window.onload = function () {
+  updateClient();
+};
+
+function reload () {
+  window.location.reload(true);
+}
+
+function updateClient () {
+  let platformCookie = Cookies.get('platformCookie');
+  let orgCookie = Cookies.get('orgCookie');
+
+  let html = `
+    <li>Platform Cookie: ${platformCookie}</li>
+    <li>Org Cookie: ${orgCookie}</li>`;
+  document.getElementById('clientCookies').innerHTML = html;
+}
+</script>

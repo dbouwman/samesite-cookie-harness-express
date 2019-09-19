@@ -1,0 +1,130 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://site-org.fakehub.fakegis.com:3000/">SameSite Cookies</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="http://site-org.fakehub.fakegis.com:3000/">Hub Site</a></li>
+            <li><a href="http://fake.customdomain.com:3001/">Custom Domain</a></li>
+            <li><a href="http://fake.customdomain.com:3001/postmessagedemo">Post Message</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <h1>Custom Domain with PostMessage</h1>
+      <h4>http://fake.customdomain.com:3001</h4>
+    </div>
+    <div class="col-sm-6">
+      <h4>Simulate OAuth, setting Platform Cookie</h4>
+      <div class="btn-group-vertical" role="group" aria-label="...">
+        <button class="btn btn-default" id="clear" onClick="clearCookie('platformCookie')">Clear Cookie</button>
+        <button class="btn btn-default" id="authNone" onClick="auth('None');">Set with SameSite=None</button>
+        <button class="btn btn-default" id="authLax" onClick="auth('Lax');">Set with SameSite=Lax</button>
+        <button class="btn btn-default" id="authStrict" onClick="auth('Strict');">Set with sameSite=Strict</button>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <h4>Simulate OAuth, setting Org Cookie</h4>
+      <div class="btn-group-vertical" role="group" aria-label="...">
+        <button class="btn btn-default" id="clear" onClick="clearCookie('orgCookie')">Clear Cookie</button>
+        <button class="btn btn-default" id="authNone" onClick="auth('None', true);">Set with SameSite=None</button>
+        <button class="btn btn-default" id="authLax" onClick="auth('Lax', true);">Set with SameSite=Lax</button>
+        <button class="btn btn-default" id="authStrict" onClick="auth('Strict', true);">Set with sameSite=Strict</button>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+       <h4>Cookies availabe @ Server</h4>
+      <ul>
+        <li>Platform Cookie: {{cookies.platformCookie}}</li>
+        <li>Org Cookie: {{cookies.orgCookie}}</li>
+      </ul>
+    </div>
+    <div class="col-sm-6">
+      <h4>Cookies availabe @ Client</h4>
+      <ul id="clientCookies"></ul>
+      <button class="btn btn-default btn-xs"  onClick="updateClient();">Refresh</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <h2>IFrame Org App postMessage</h2>
+      <h4>http://org.fakemaps.fakegis.com:3000/pm-app-in-iframe</h4>
+      <div class="button-group">
+        <button class="btn btn-default" onClick="postCookie('None');">Send with SameSite=None</button>
+        <button class="btn btn-default" onClick="postCookie('Lax');">Send with SameSite=Lax</button>
+        <button class="btn btn-default" onClick="postCookie('Strict');">Send with sameSite=Strict</button>
+      </div>
+        <iframe width=100% height=400 src="http://org.fakemaps.fakegis.com:3000/pm-app-in-iframe"></iframe>      
+    </div>
+  </div>
+</div>
+
+<script>
+
+window.onload = function () {
+  updateClient();
+  window.addEventListener("message", receiveMessage, false);
+};
+
+let iframedApp;
+
+function receiveMessage(event) {
+  if (event.data.type === 'appLoaded') {
+    iframedApp = event.source;
+    // send creds over to the app, which will then set it as a cookie
+    // postCookie('Lax');
+  }
+}
+
+function postCookie (sameSite) {
+  iframedApp.postMessage({type: 'cookieInfo', name: 'platformCookie', data:{
+    username: 'joeuser',
+    token: 'bz43ac',
+    sameSite: sameSite || 'None'
+  }}, '*');
+}
+
+function clearCookie (name) {
+  let existing = Cookies.getJSON(name);
+  if (existing) {
+    Cookies.remove(name, {SameSite: existing.sameSite});
+  }
+}
+
+function reload () {
+  window.location.reload(true);
+}
+
+function auth (type, useOrgUrl) {
+  const redirect = encodeURI('./redirect.html');
+  let base = 'www.fakegis.com';
+  if (useOrgUrl) {
+    base = 'org.fakemaps.fakegis.com';
+  }
+  window.open(`http://${base}:3000/authorize?redirect_uri=${redirect}&sameSite=${type}`, 'Fake oAuth', 'location=yes,height=800,width=600');
+}
+
+
+function updateClient () {
+  let platformCookie = Cookies.get('platformCookie');
+  let orgCookie = Cookies.get('orgCookie');
+
+  let html = `
+    <li>Platform Cookie: ${platformCookie}</li>
+    <li>Org Cookie: ${orgCookie}</li>`;
+  document.getElementById('clientCookies').innerHTML = html;
+}
+</script>
